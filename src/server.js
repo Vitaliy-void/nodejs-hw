@@ -2,65 +2,44 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import pinoHttp from 'pino-http';
+
+import { connectMongoDB } from './db/connectMongoDB.js';
+import logger from './middleware/logger.js';
+import notFoundHandler from './middleware/notFoundHandler.js';
+import errorHandler from './middleware/errorHandler.js';
+import notesRouter from './routes/notesRoutes.js';
 
 dotenv.config();
 
 const app = express();
-
-// порт з .env або 3000 за замовчуванням
 const PORT = process.env.PORT || 3000;
 
-// ===== Глобальні middleware =====
+// ===== Global middleware =====
+app.use(logger);        // pino-http
 app.use(cors());
 app.use(express.json());
-app.use(pinoHttp()); // БЕЗ pino-pretty, просто стандартний логер
 
-// ===== Маршрути =====
+// ===== Routes =====
+app.use('/', notesRouter); // усі /notes... описані в notesRoutes.js
 
-// GET /notes — всі нотатки
-app.get('/notes', (req, res) => {
-  res.status(200).json({
-    message: 'Retrieved all notes',
+// *НЕ* використовуємо більше /test-error – видаляємо його з цього файлу
+
+// 404 – після всіх роутів
+app.use(notFoundHandler);
+
+// Error handler – останній
+app.use(errorHandler);
+
+// ===== Start server only after DB connection =====
+const startServer = async () => {
+  await connectMongoDB();
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
   });
-});
+};
 
-// GET /notes/:noteId — одна нотатка за ID
-app.get('/notes/:noteId', (req, res) => {
-  const { noteId } = req.params;
-
-  res.status(200).json({
-    message: `Retrieved note with ID: ${noteId}`,
-  });
-});
-
-// тестовий маршрут, який кидає помилку
-app.get('/test-error', () => {
-  throw new Error('Simulated server error');
-});
-
-// ===== 404 middleware =====
-app.use((req, res, next) => {
-  res.status(404).json({
-    message: 'Route not found',
-  });
-});
-
-// ===== middleware для помилок (500) =====
-app.use((err, req, res, next) => {
-  // pino-http додає log на req, але це не обовʼязково
-  if (req.log) {
-    req.log.error(err);
-  } else {
-    console.error(err);
-  }
-
-  res.status(500).json({
-    message: err.message || 'Internal server error',
-  });
-});
-
-// ===== Запуск сервера =====
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+startServer().catch((error) => {
+  console.error('❌ Failed to start server', error);
+  process.exit(1);
 });

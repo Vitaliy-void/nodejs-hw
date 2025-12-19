@@ -1,0 +1,17 @@
+[
+  {
+    "title": "Shopping list",
+    "content": "Buy milk, bread, coffee",
+    "tag": "Shopping"
+  },
+  {
+    "title": "Work meeting",
+    "content": "Meeting with project manager at 10 AM",
+    "tag": "Meeting"
+  },
+  {
+    "title": "Weekend plan",
+    "content": "Go to gym and finish reading a book",
+    "tag": "Personal"
+  }
+]
