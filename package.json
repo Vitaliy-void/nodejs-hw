@@ -4,7 +4,9 @@
   "main": "src/server.js",
   "type": "module",
   "scripts": {
+    "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,14 +20,17 @@
     "url": "https://github.com/Vitaliy-void/nodejs-hw/issues"
   },
   "homepage": "https://github.com/Vitaliy-void/nodejs-hw#readme",
-  "description": "",
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.2",
     "globals": "^16.5.0",
     "nodemon": "^3.1.11"
   },
   "dependencies": {
-    "express": "^5.1.0"
-  }
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "pino-http": "^11.0.0"
+  },
+  "description": ""
 }
