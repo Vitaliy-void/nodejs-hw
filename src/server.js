@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { errors as celebrateErrors } from 'celebrate';
 
 import { connectMongoDB } from './db/connectMongoDB.js';
 import { logger } from './middleware/logger.js';
@@ -13,22 +14,21 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// middleware
 app.use(logger);
 app.use(cors());
 app.use(express.json());
 
-// routes
 app.use('/', notesRouter);
 
-// 404
 app.use(notFoundHandler);
 
-// errors
+app.use(celebrateErrors());
+
 app.use(errorHandler);
 
 const startServer = async () => {
   await connectMongoDB();
+
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });

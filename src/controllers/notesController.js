@@ -1,74 +1,43 @@
-import createHttpError from 'http-errors';
 import Note from '../models/note.js';
 
 // GET /notes
 export const getAllNotes = async (req, res, next) => {
   try {
-    const notes = await Note.find();
-    res.status(200).json(notes);
-  } catch (error) {
-    next(error);
-  }
-};
+    const {
+      page = 1,
+      perPage = 10,
+      tag,
+      search,
+    } = req.query;
 
-// GET /notes/:noteId
-export const getNoteById = async (req, res, next) => {
-  try {
-    const { noteId } = req.params;
+    const pageNum = Number(page) || 1;
+    const limit = Number(perPage) || 10;
+    const skip = (pageNum - 1) * limit;
 
-    const note = await Note.findById(noteId);
+    const filter = {};
 
-    if (!note) {
-      return next(createHttpError(404, 'Note not found'));
+    if (tag) {
+      filter.tag = tag;
     }
 
-    res.status(200).json(note);
-  } catch (error) {
-    next(error);
-  }
-};
-
-// POST /notes
-export const createNote = async (req, res, next) => {
-  try {
-    const note = await Note.create(req.body);
-    res.status(201).json(note);
-  } catch (error) {
-    next(error);
-  }
-};
-
-// DELETE /notes/:noteId
-export const deleteNote = async (req, res, next) => {
-  try {
-    const { noteId } = req.params;
-
-    const deleted = await Note.findByIdAndDelete(noteId);
-
-    if (!deleted) {
-      return next(createHttpError(404, 'Note not found'));
+    if (typeof search === 'string' && search.trim() !== '') {
+      filter.$text = { $search: search.trim() };
     }
 
-    res.status(200).json(deleted);
-  } catch (error) {
-    next(error);
-  }
-};
+    const [totalNotes, notes] = await Promise.all([
+      Note.countDocuments(filter),
+      Note.find(filter).skip(skip).limit(limit),
+    ]);
 
-// PATCH /notes/:noteId
-export const updateNote = async (req, res, next) => {
-  try {
-    const { noteId } = req.params;
+    const totalPages = Math.ceil(totalNotes / limit) || 1;
 
-    const updated = await Note.findByIdAndUpdate(noteId, req.body, {
-      new: true,
+    res.status(200).json({
+      page: pageNum,
+      perPage: limit,
+      totalNotes,
+      totalPages,
+      notes,
     });
-
-    if (!updated) {
-      return next(createHttpError(404, 'Note not found'));
-    }
-
-    res.status(200).json(updated);
   } catch (error) {
     next(error);
   }
