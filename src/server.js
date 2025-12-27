@@ -11,6 +11,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 
 import authRouter from './routes/authRoutes.js';
 import notesRouter from './routes/notesRoutes.js';
+import userRouter from './routes/userRoutes.js';
 
 dotenv.config();
 
@@ -28,6 +29,10 @@ app.use(notesRouter);
 app.use(notFoundHandler);
 app.use(celebrateErrors());
 app.use(errorHandler);
+
+app.use(authRouter);
+app.use(notesRouter);
+app.use(userRouter);
 
 const startServer = async () => {
   await connectMongoDB();

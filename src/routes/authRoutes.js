@@ -6,10 +6,14 @@ import {
   loginUser,
   refreshUserSession,
   logoutUser,
+  requestResetEmail,
+  resetPassword,
 } from '../controllers/authController.js';
 import {
   registerUserSchema,
   loginUserSchema,
+  requestResetEmailSchema,
+  resetPasswordSchema,
 } from '../validations/authValidation.js';
 
 const router = Router();
@@ -21,5 +25,17 @@ router.post('/login', celebrate(loginUserSchema), loginUser);
 router.post('/refresh', refreshUserSession);
 
 router.post('/logout', logoutUser);
+
+router.post(
+  '/auth/request-reset-email',
+  celebrate(requestResetEmailSchema),
+  requestResetEmail,
+);
+
+router.post(
+  '/auth/reset-password',
+  celebrate(resetPasswordSchema),
+  resetPassword,
+);
 
 export default router;
